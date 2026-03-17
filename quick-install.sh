@@ -15,7 +15,8 @@ CYAN='\033[0;36m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-GITHUB_REPO="https://github.com/your-username/interview-cracker"
+GITHUB_REPO="https://github.com/kirpic-m/interview-cracker"
+RAW_URL="https://raw.githubusercontent.com/kirpic-m/interview-cracker/main"
 INSTALL_DIR="$HOME/.interview-cracker"
 BIN_DIR="$HOME/.local/bin"
 
@@ -112,18 +113,17 @@ install_node() {
 build_from_source() {
     echo -e "${YELLOW}Downloading source...${NC}"
     
-    if command -v git &> /dev/null; then
-        git clone --depth 1 "$GITHUB_REPO.git" "$INSTALL_DIR" 2>/dev/null || {
-            # If no git, download zip
-            curl -sL "${GITHUB_REPO}/archive/main.zip" -o /tmp/ic.zip
-            unzip -q /tmp/ic.zip -d /tmp
-            mv /tmp/interview-cracker-main "$INSTALL_DIR"
-        }
-    else
-        curl -sL "${GITHUB_REPO}/archive/main.zip" -o /tmp/ic.zip
-        unzip -q /tmp/ic.zip -d /tmp
-        mv /tmp/interview-cracker-main "$INSTALL_DIR"
+    if [ -d "$INSTALL_DIR" ]; then
+        rm -rf "$INSTALL_DIR"
     fi
+    
+    mkdir -p "$INSTALL_DIR"
+    
+    # Download zip from GitHub (no login required)
+    curl -sL "${GITHUB_REPO}/archive/refs/heads/main.zip" -o /tmp/interview-cracker.zip
+    unzip -q /tmp/interview-cracker.zip -d /tmp
+    mv /tmp/interview-cracker-main/* "$INSTALL_DIR/"
+    rm -rf /tmp/interview-cracker.zip /tmp/interview-cracker-main
     
     cd "$INSTALL_DIR"
     

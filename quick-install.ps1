@@ -23,7 +23,8 @@ Write-Host "Installing..." -ForegroundColor Yellow
 Write-Host ""
 
 $InstallDir = "$env:LOCALAPPDATA\InterviewCracker"
-$GITHUB_REPO = "https://github.com/your-username/interview-cracker"
+$GITHUB_REPO = "https://github.com/kirpic-m/interview-cracker"
+$ZIP_URL = "$GITHUB_REPO/archive/refs/heads/main.zip"
 
 # Check for pre-built release
 function Try-Prebuilt {
@@ -97,10 +98,12 @@ function Build-FromSource {
         Remove-Item -Recurse -Force $InstallDir
     }
     
-    # Download zip
-    Invoke-WebRequest -Uri "$GITHUB_REPO/archive/main.zip" -OutFile "$env:TEMP\ic.zip"
-    Expand-Archive -Path "$env:TEMP\ic.zip" -DestinationPath "$env:TEMP\ic"
+    # Download zip (no login required)
+    $zipPath = "$env:TEMP\interview-cracker.zip"
+    Invoke-WebRequest -Uri $ZIP_URL -OutFile $zipPath
+    Expand-Archive -Path $zipPath -DestinationPath "$env:TEMP\ic"
     Move-Item "$env:TEMP\ic\interview-cracker-main" $InstallDir
+    Remove-Item $zipPath, "$env:TEMP\ic" -Recurse -Force
     
     Set-Location $InstallDir
     
@@ -111,8 +114,10 @@ function Build-FromSource {
     & "$env:USERPROFILE\.cargo\bin\cargo.exe" build --manifest-path src-tauri\Cargo.toml --release
     
     # Create icons
-    magick convert -size 128x128 xc:"rgba(245,158,11,1)" "src-tauri\icons\128x128.png" 2>$null
-    magick convert "src-tauri\icons\128x128.png" "src-tauri\icons\icon.ico" 2>$null
+    if (Get-Command magick -ErrorAction SilentlyContinue) {
+        magick convert -size 128x128 xc:"rgba(245,158,11,1)" "src-tauri\icons\128x128.png" 2>$null
+        magick convert "src-tauri\icons\128x128.png" "src-tauri\icons\icon.ico" 2>$null
+    }
 }
 
 # Create shortcuts
