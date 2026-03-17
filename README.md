@@ -111,3 +111,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND...
 ## 🤝 Contributing
 
 PRs welcome!
+
+## 🗑️ Uninstall
+
+**Linux/macOS:**
+```bash
+curl -sSL https://raw.githubusercontent.com/kirpic-m/interview-cracker/main/uninstall.sh | bash
+```
+
+**Windows:**
+```powershell
+irm https://raw.githubusercontent.com/kirpic-m/interview-cracker/main/uninstall.ps1 | iex
+```
