@@ -17,7 +17,8 @@ NC='\033[0m'
 
 GITHUB_REPO="https://github.com/kirpic-m/interview-cracker"
 RAW_URL="https://raw.githubusercontent.com/kirpic-m/interview-cracker/main"
-INSTALL_DIR="$HOME/.interview-cracker"
+INSTALL_DIR="$HOME/interview-cracker"
+INSTALL_DIR="$HOME/interview-cracker"
 BIN_DIR="$HOME/.local/bin"
 
 echo ""
