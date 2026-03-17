@@ -1,236 +1,127 @@
 #!/bin/bash
-# Interview Cracker - One-Line Installer
-# 
-# Linux/macOS: curl -sSL https://interviewcracker.app/install | bash
-# Or: bash <(curl -sSL https://interviewcracker.app/install)
-#
-# This script downloads and installs everything automatically.
+# Interview Cracker - One-Line Installer for Linux/macOS
+# Usage: curl -sSL https://raw.githubusercontent.com/kirpic-m/interview-cracker/main/quick-install.sh | bash
 
 set -e
 
-BOLD='\033[1m'
 GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
 YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
 GITHUB_REPO="https://github.com/kirpic-m/interview-cracker"
-RAW_URL="https://raw.githubusercontent.com/kirpic-m/interview-cracker/main"
 INSTALL_DIR="$HOME/interview-cracker"
-INSTALL_DIR="$HOME/interview-cracker"
-BIN_DIR="$HOME/.local/bin"
 
 echo ""
-echo -e "${CYAN}${BOLD}"
-echo "  ╦╔╦╗╔═╗╦═╗╦╔╦╗╔═╗╦    ╔═╗╦ ╦╔═╗╔╦╗╔═╗╔╦╗"
-echo "  ║║║║╠═╝╠╦╝║ ║ ╠═╣║    ╚═╗║ ║╚═╗ ║ ║╣  ║║"
-echo "  ╩ ╩ ╩  ╩╚═╩ ╩ ╩ ╩╩═╝  ╚═╝╚═╝╚═╝ ╩ ╚═╝═╩╝"
-echo -e "${NC}"
-echo -e "${BOLD}AI interview assistant${NC}"
-echo ""
-echo -e "${BLUE}Installing...${NC}"
+echo -e "${CYAN}Interview Cracker - AI Interview Assistant${NC}"
 echo ""
 
-# Detect OS
-OS="$(uname -s)"
-ARCH="$(uname -m)"
-
-# Check for pre-built binary
-check_prebuilt() {
-    echo -e "Checking for pre-built release..."
-    
-    # Determine platform
-    case "$OS" in
-        Linux)  PLATFORM="linux" ;;
-        Darwin) PLATFORM="macos" ;;
-        *)      PLATFORM="unknown" ;;
-    esac
-    
-    # Try to download pre-built binary
-    DOWNLOAD_URL="${GITHUB_REPO}/releases/latest/download/interview-cracker-${PLATFORM}-${ARCH}"
-    
-    if command -v curl &> /dev/null; then
-        if curl -sL --head "$DOWNLOAD_URL" | grep -q "200 OK"; then
-            echo -e "${GREEN}Found pre-built binary! Downloading...${NC}"
-            mkdir -p "$INSTALL_DIR" "$BIN_DIR"
-            curl -sL "$DOWNLOAD_URL" -o "$INSTALL_DIR/interview-cracker"
-            chmod +x "$INSTALL_DIR/interview-cracker"
-            ln -sf "$INSTALL_DIR/interview-cracker" "$BIN_DIR/interview-cracker"
-            return 0
-        fi
-    fi
-    
-    return 1
-}
-
-# Quick install for Linux
-install_linux() {
-    echo -e "${YELLOW}Installing dependencies...${NC}"
-    
-    if command -v pacman &> /dev/null; then
-        sudo pacman -S --noconfirm --needed webkit2gtk-4.1 gtk3 libsoup3 base-devel openssl librsvg libappindicator-gtk3
-    elif command -v apt &> /dev/null; then
-        sudo apt update && sudo apt install -y libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev build-essential libssl-dev librsvg2-dev libayatana-appindicator3-dev
-    elif command -v dnf &> /dev/null; then
-        sudo dnf install -y webkit2gtk4.1-devel gtk3-devel libsoup3-devel gcc-c++ openssl-devel librsvg2-devel
-    fi
-}
-
-# Quick install for macOS
-install_macos() {
-    if ! command -v brew &> /dev/null; then
-        echo -e "${YELLOW}Installing Homebrew...${NC}"
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    fi
-    echo -e "${GREEN}✓ Dependencies ready${NC}"
-}
-
-# Install Rust
 install_rust() {
     if ! command -v rustc &> /dev/null; then
-        echo -e "${YELLOW}Installing Rust...${NC}"
+        echo "Installing Rust..."
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --quiet
         source "$HOME/.cargo/env" 2>/dev/null
         export PATH="$HOME/.cargo/bin:$PATH"
     fi
+    echo "✓ Rust"
 }
 
-# Install Node.js  
 install_node() {
     if ! command -v node &> /dev/null; then
-        echo -e "${YELLOW}Installing Node.js...${NC}"
+        echo "Installing Node.js..."
         if command -v pacman &> /dev/null; then
             sudo pacman -S --noconfirm nodejs npm
         elif command -v apt &> /dev/null; then
-            sudo apt install -y nodejs npm
+            sudo apt update && sudo apt install -y nodejs npm
         elif command -v brew &> /dev/null; then
             brew install node
         fi
     fi
+    echo "✓ Node.js"
 }
 
-# Build from source
-build_from_source() {
-    echo -e "${YELLOW}Downloading source...${NC}"
-    
-    if [ -d "$INSTALL_DIR" ]; then
-        rm -rf "$INSTALL_DIR"
+install_deps() {
+    echo "Installing dependencies..."
+    if command -v pacman &> /dev/null; then
+        sudo pacman -S --noconfirm --needed webkit2gtk-4.1 gtk3 libsoup3 base-devel openssl librsvg libappindicator-gtk3
+    elif command -v apt &> /dev/null; then
+        sudo apt update && sudo apt install -y libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev build-essential libssl-dev librsvg2-dev libayatana-appindicator3-dev
     fi
-    
+    echo "✓ Dependencies"
+}
+
+build_app() {
+    echo "Downloading source..."
+    rm -rf "$INSTALL_DIR"
     mkdir -p "$INSTALL_DIR"
     
-    # Download zip from GitHub (no login required)
-    curl -sL "${GITHUB_REPO}/archive/refs/heads/main.zip" -o /tmp/interview-cracker.zip
-    unzip -q /tmp/interview-cracker.zip -d /tmp
+    curl -sL "${GITHUB_REPO}/archive/refs/heads/main.zip" -o /tmp/ic.zip
+    unzip -q /tmp/ic.zip -d /tmp
     mv /tmp/interview-cracker-main/* "$INSTALL_DIR/"
-    rm -rf /tmp/interview-cracker.zip /tmp/interview-cracker-main
+    rm -rf /tmp/ic.zip /tmp/interview-cracker-main
     
     cd "$INSTALL_DIR"
-    
-    echo -e "${YELLOW}Installing npm packages...${NC}"
+    echo "Installing npm packages..."
     npm install --quiet
     
-    echo -e "${YELLOW}Building...${NC}"
+    echo "Building (5-10 min first time)..."
     source "$HOME/.cargo/env" 2>/dev/null || export PATH="$HOME/.cargo/bin:$PATH"
     cd src-tauri && cargo build --release && cd ..
     
-    # Create icons
-    mkdir -p src-tauri/icons
-    if command -v convert &> /dev/null; then
-        convert -size 128x128 xc:'rgba(245,158,11,1)' PNG32:src-tauri/icons/128x128.png 2>/dev/null
-    fi
+    echo "✓ Build complete"
 }
 
-# Create desktop entry
-create_desktop_entry() {
-    echo -e "${YELLOW}Creating shortcuts...${NC}"
+create_shortcuts() {
+    echo "Creating shortcuts..."
     
-    # Create launcher script
-    LAUNCHER="$INSTALL_DIR/launch.sh"
-    cat > "$LAUNCHER" << 'LAUNCHER_EOF'
+    cat > "$INSTALL_DIR/launch.sh" << 'LAUNCH'
 #!/bin/bash
 cd "$(dirname "$(readlink -f "$0")")"
 source "$HOME/.cargo/env" 2>/dev/null
-fuser -k 5173/tcp 2>/dev/null
 
-# Try release binary first, then dev mode
 if [ -f "src-tauri/target/release/interview-cracker" ]; then
-    exec src-tauri/target/release/interview-cracker
+    exec src-tauri/target/release/interview-cracker "$@"
 else
+    export PATH="$HOME/.cargo/bin:$PATH"
     nohup npm run tauri dev > /tmp/interview-cracker.log 2>&1 &
 fi
-LAUNCHER_EOF
-    chmod +x "$LAUNCHER"
+LAUNCH
+    chmod +x "$INSTALL_DIR/launch.sh"
     
-    DESKTOP_FILE="$HOME/.local/share/applications/interview-cracker.desktop"
-    mkdir -p "$HOME/.local/share/applications"
+    DESKTOP_DIR="$HOME/.local/share/applications"
+    mkdir -p "$DESKTOP_DIR"
     
-    cat > "$DESKTOP_FILE" << EOF
+    cat > "$DESKTOP_DIR/interview-cracker.desktop" << EOF
 [Desktop Entry]
 Name=Interview Cracker
 Comment=AI-powered interview assistant
-Exec=$LAUNCHER
+Exec=$INSTALL_DIR/launch.sh
 Icon=$INSTALL_DIR/src-tauri/icons/128x128.png
 Terminal=false
 Type=Application
 Categories=Utility;Development;
-Keywords=interview;ai;
-StartupNotify=true
 EOF
     
-    # Desktop
-    if [ -d "$HOME/Desktop" ]; then
-        cp "$DESKTOP_FILE" "$HOME/Desktop/"
-        chmod +x "$HOME/Desktop/interview-cracker.desktop"
-    fi
-    if [ -d "$HOME/Робочий стіл" ]; then
-        cp "$DESKTOP_FILE" "$HOME/Робочий стіл/"
-        chmod +x "$HOME/Робочий стіл/interview-cracker.desktop"
-    fi
+    chmod +x "$DESKTOP_DIR/interview-cracker.desktop"
+    [ -d "$HOME/Desktop" ] && cp "$DESKTOP_DIR/interview-cracker.desktop" "$HOME/Desktop/"
+    [ -d "$HOME/Робочий стіл" ] && cp "$DESKTOP_DIR/interview-cracker.desktop" "$HOME/Робочий стіл/"
     
-    update-desktop-database "$HOME/.local/share/applications/" 2>/dev/null || true
+    update-desktop-database "$DESKTOP_DIR" 2>/dev/null || true
+    echo "✓ Shortcuts created"
 }
 
-# Main
-main() {
-    # Try pre-built first
-    if check_prebuilt; then
-        create_desktop_entry
-        echo ""
-        echo -e "${GREEN}${BOLD}✓ Installed from pre-built binary!${NC}"
-        echo -e "Run: ${CYAN}interview-cracker${NC} or click the desktop icon"
-        exit 0
-    fi
-    
-    # Install system deps
-    case "$OS" in
-        Linux)  install_linux ;;
-        Darwin) install_macos ;;
-        *)      echo "Unsupported OS"; exit 1 ;;
-    esac
-    
-    # Install build tools
-    install_rust
-    install_node
-    
-    # Build
-    build_from_source
-    
-    # Create shortcuts
-    create_desktop_entry
-    
-    echo ""
-    echo -e "${GREEN}${BOLD}═══════════════════════════════════════${NC}"
-    echo -e "${GREEN}${BOLD}✓ Installation complete!${NC}"
-    echo -e "${GREEN}${BOLD}═══════════════════════════════════════${NC}"
-    echo ""
-    echo -e "Find ${CYAN}${BOLD}Interview Cracker${NC} in:"
-    echo -e "  📱 Applications menu"
-    echo -e "  🖥️  Desktop icon"
-    echo ""
-    echo -e "Run: ${CYAN}$INSTALL_DIR/target/release/interview-cracker${NC}"
-    echo ""
-}
+echo "[1/5] Rust"; install_rust
+echo "[2/5] Node.js"; install_node
+echo "[3/5] Dependencies"; install_deps
+echo "[4/5] Building"; build_app
+echo "[5/5] Shortcuts"; create_shortcuts
 
-main "$@"
+echo ""
+echo "═══════════════════════════════════════"
+echo "✓ Installation complete!"
+echo "═══════════════════════════════════════"
+echo ""
+echo "Find 'Interview Cracker' in:"
+echo "  • Applications menu"
+echo "  • Desktop icon"
+echo ""
