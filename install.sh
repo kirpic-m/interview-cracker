@@ -160,16 +160,34 @@ install_desktop() {
     DESKTOP_DIR="$HOME/.local/share/applications"
     mkdir -p "$DESKTOP_DIR"
     
+    # Create launcher script
+    cat > "$INSTALL_DIR/launch.sh" << 'EOF'
+#!/bin/bash
+cd "$(dirname "$(readlink -f "$0")")"
+source "$HOME/.cargo/env" 2>/dev/null
+fuser -k 5173/tcp 2>/dev/null
+
+if [ -f "src-tauri/target/release/interview-cracker" ]; then
+    exec src-tauri/target/release/interview-cracker
+elif [ -f "target/release/interview-cracker" ]; then
+    exec target/release/interview-cracker
+else
+    exec npm run tauri dev
+fi
+EOF
+    chmod +x "$INSTALL_DIR/launch.sh"
+    
     cat > "$DESKTOP_DIR/interview-cracker.desktop" << EOF
 [Desktop Entry]
 Name=Interview Cracker
-Comment=AI interview assistant
-Exec=$INSTALL_DIR/target/release/interview-cracker
+Comment=AI-powered interview assistant
+Exec=$INSTALL_DIR/launch.sh
 Icon=$INSTALL_DIR/src-tauri/icons/128x128.png
 Terminal=false
 Type=Application
 Categories=Utility;Development;
-Keywords=interview;ai;assistant;
+Keywords=interview;ai;
+StartupNotify=true
 EOF
     
     # Desktop icon

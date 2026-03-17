@@ -145,19 +145,37 @@ build_from_source() {
 create_desktop_entry() {
     echo -e "${YELLOW}Creating shortcuts...${NC}"
     
+    # Create launcher script
+    LAUNCHER="$INSTALL_DIR/launch.sh"
+    cat > "$LAUNCHER" << 'LAUNCHER_EOF'
+#!/bin/bash
+cd "$(dirname "$(readlink -f "$0")")"
+source "$HOME/.cargo/env" 2>/dev/null
+fuser -k 5173/tcp 2>/dev/null
+
+# Try release binary first, then dev mode
+if [ -f "src-tauri/target/release/interview-cracker" ]; then
+    exec src-tauri/target/release/interview-cracker
+else
+    nohup npm run tauri dev > /tmp/interview-cracker.log 2>&1 &
+fi
+LAUNCHER_EOF
+    chmod +x "$LAUNCHER"
+    
     DESKTOP_FILE="$HOME/.local/share/applications/interview-cracker.desktop"
     mkdir -p "$HOME/.local/share/applications"
     
     cat > "$DESKTOP_FILE" << EOF
 [Desktop Entry]
 Name=Interview Cracker
-Comment=AI interview assistant
-Exec=$INSTALL_DIR/target/release/interview-cracker
+Comment=AI-powered interview assistant
+Exec=$LAUNCHER
 Icon=$INSTALL_DIR/src-tauri/icons/128x128.png
 Terminal=false
 Type=Application
 Categories=Utility;Development;
 Keywords=interview;ai;
+StartupNotify=true
 EOF
     
     # Desktop
