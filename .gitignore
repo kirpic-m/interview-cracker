@@ -1,0 +1,33 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+src-tauri/target/
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.sw?
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Environment
+.env
+*.local
+
+# Settings (contains API keys!)
+**/settings.json
+
+# Icons (will be generated)
+src-tauri/icons/*.png
+src-tauri/icons/*.ico
+src-tauri/icons/*.icns
