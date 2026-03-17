@@ -4,8 +4,8 @@ mod audio;
 mod db;
 mod documents;
 mod screenshot;
-mod screen_hiding;
 mod settings;
+mod stealth;
 mod transcription;
 
 use std::sync::Arc;
@@ -310,20 +310,8 @@ async fn transcribe_and_ask(
 #[tauri::command]
 async fn enable_stealth_mode(
     state: tauri::State<'_, AppState>,
-    window: tauri::Window,
 ) -> Result<(), String> {
-    #[cfg(target_os = "windows")]
-    {
-        let hwnd = window.hwnd().map_err(|e| e.to_string())?;
-        screen_hiding::hide_window_from_screen_capture(Some(hwnd.0 as isize))
-            .map_err(|e| e.to_string())?;
-    }
-
-    #[cfg(not(target_os = "windows"))]
-    {
-        screen_hiding::hide_window_from_screen_capture(None)
-            .map_err(|e| e.to_string())?;
-    }
+    stealth::hide_from_capture().map_err(|e| e.to_string())?;
 
     let mut stealth = state.stealth_mode.write().await;
     *stealth = true;
@@ -335,20 +323,8 @@ async fn enable_stealth_mode(
 #[tauri::command]
 async fn disable_stealth_mode(
     state: tauri::State<'_, AppState>,
-    window: tauri::Window,
 ) -> Result<(), String> {
-    #[cfg(target_os = "windows")]
-    {
-        let hwnd = window.hwnd().map_err(|e| e.to_string())?;
-        screen_hiding::show_window_in_screen_capture(Some(hwnd.0 as isize))
-            .map_err(|e| e.to_string())?;
-    }
-
-    #[cfg(not(target_os = "windows"))]
-    {
-        screen_hiding::show_window_in_screen_capture(None)
-            .map_err(|e| e.to_string())?;
-    }
+    stealth::show_in_capture().map_err(|e| e.to_string())?;
 
     let mut stealth = state.stealth_mode.write().await;
     *stealth = false;
@@ -362,13 +338,20 @@ async fn get_stealth_status(state: tauri::State<'_, AppState>) -> Result<serde_j
     let stealth = state.stealth_mode.read().await;
     Ok(serde_json::json!({
         "enabled": *stealth,
-        "supported": screen_hiding::is_screen_capture_hiding_supported(),
+        "supported": stealth::is_supported(),
     }))
 }
 
 #[tauri::command]
 fn is_screen_capture_hiding_supported() -> bool {
-    screen_hiding::is_screen_capture_hiding_supported()
+    stealth::is_supported()
+}
+
+#[tauri::command]
+fn launch_virtual_display() -> Result<String, String> {
+    stealth::launch_on_virtual_display()
+        .map(|_| "Virtual display started on :99. Connect via VNC to localhost:5999".to_string())
+        .map_err(|e| e.to_string())
 }
 
 // Auto mode commands
@@ -768,25 +751,7 @@ fn main() {
             disable_stealth_mode,
             get_stealth_status,
             is_screen_capture_hiding_supported,
-            start_auto_mode,
-            stop_auto_mode,
-            get_auto_mode_status,
-            update_auto_mode_config,
-            get_auto_mode_config,
-            take_screenshot,
-            analyze_screenshot,
-            screenshot_and_analyze,
-            get_vision_models,
-            upload_document,
-            add_text_document,
-            get_documents,
-            remove_document,
-            clear_documents,
-            get_documents_context,
-            get_supported_file_types,
-            load_app_settings,
-            save_app_settings,
-            get_api_key,
+            launch_virtual_display,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
