@@ -20,26 +20,26 @@ AI-powered interview assistant with real-time answers. Crack any interview!
 
 **Linux/macOS:**
 ```bash
-curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/interview-cracker/main/quick-install.sh | bash
+curl -sSL https://raw.githubusercontent.com/kirpic-m/interview-cracker/main/quick-install.sh | bash
 ```
 
 **Windows (PowerShell as Admin):**
 ```powershell
-irm https://raw.githubusercontent.com/YOUR_USERNAME/interview-cracker/main/quick-install.ps1 | iex
+irm https://raw.githubusercontent.com/kirpic-m/interview-cracker/main/quick-install.ps1 | iex
 ```
 
 ### Manual Install
 
 **Linux:**
 ```bash
-git clone https://github.com/YOUR_USERNAME/interview-cracker.git
+git clone https://github.com/kirpic-m/interview-cracker.git
 cd interview-cracker
 bash install.sh
 ```
 
 **Windows:**
 ```powershell
-git clone https://github.com/YOUR_USERNAME/interview-cracker.git
+git clone https://github.com/kirpic-m/interview-cracker.git
 cd interview-cracker
 .\install.ps1
 ```
